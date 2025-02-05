@@ -1,0 +1,44 @@
+main div {
+    --darker-background: rgb(220, 220, 220);
+    --background-color: #f4f4f4;
+}
+
+main div.datatable {
+    border: 1px solid var(--darker-background);
+    border-top-left-radius: var(--border-radius);
+    border-top-right-radius: var(--border-radius);
+    --inside-radius: calc(var(--border-radius) / 1.2);
+}
+
+main div div.caption {
+    background-color: var(--darker-background);
+    border: 1px solid var(--darker-background);
+    border-top-left-radius: var(--inside-radius);
+    border-top-right-radius: var(--inside-radius);
+    padding-left: 0.3rem;
+    padding-top: 0.2rem;
+    padding-bottom: 0.1rem;
+    height: 1.5rem;
+}
+
+main div table {
+    border-collapse: collapse;
+    width: 100%;
+    --row-height: 1.6rem;
+}
+
+main div table thead tr th {
+    border: 1px solid var(--darker-background);
+    /* text-align: center; */
+    height: var(--row-height);
+}
+
+main div table tbody tr td {
+    border: 1px solid var(--darker-background);
+    /* text-align: center; */
+    height: var(--row-height);
+}
+
+main div table tbody tr:nth-child(even) {
+    background-color: var(--background-color);
+}

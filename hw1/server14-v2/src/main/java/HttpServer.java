@@ -2,17 +2,21 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 class HttpServer {
     private final File root;
-    private final ETags etags;
+    private MessageDigest md; 
 
     private HttpServer(File root, int port) throws IOException {
         this.root = root;
-        this.etags = new ETags();
+        try {
+            md = MessageDigest.getInstance("SHA-1");
+        } catch (NoSuchAlgorithmException ignored) {}
 
         ServerSocket serverSocket = new ServerSocket(port);
         while (serverSocket.isBound()) {
@@ -73,31 +77,41 @@ class HttpServer {
         File file = new File(root, java.net.URLDecoder.decode(request.getUri(), StandardCharsets.UTF_8.name()));
 
         if (file.isDirectory())
-            file = new File(file, "/index.html");
+            file = new File(file, "index.html");
 
         if (!file.isFile()) {
             response.setStatusCode(404);
             return;
         }
 
-        etags.check(file);
+        byte[] body = readFile(file);
+        String hash = hash(body);
 
         if (request.headers.containsKey("If-None-Match") 
-            && request.headers.get("If-None-Match").equals(etags.get(file))) {
+            && request.headers.get("If-None-Match").equals(hash)) {
             response.setStatusCode(304);
-            response.setHeader("ETag", etags.get(file));
-            return;
+            response.setBody(new byte[0]);
+        } else {
+            
+            response.setStatusCode(200);
+            response.setBody(body);
+            response.setHeader("Content-Length", Integer.toString(body.length));
+            response.setHeader("Content-Type", getContentType(file));
         }
 
-        
-        byte[] body = readFile(file);
-        response.setStatusCode(200);
-        response.setBody(body);
-        response.setHeader("Content-Length", Integer.toString(body.length));
-        response.setHeader("Content-Type", getContentType(file));
-
-        response.setHeader("ETag", etags.get(file));
+        response.setHeader("ETag", hash);
     }
+
+    private String hash(byte[] data) {
+        byte[] hash = md.digest(data);
+        StringBuilder sb = new StringBuilder();
+        for (byte b : hash)
+            sb.append(Byte.toString(b));
+        System.err.println(sb.toString());
+        return sb.toString();
+    }
+
+    
 
     private String getContentType(File file) {
         String path = file.getAbsolutePath();
@@ -173,27 +187,6 @@ class HttpServer {
     private Request readRequest(Socket socket) throws IOException {
         InputStream inputStream = socket.getInputStream();
         return new Request(new String(readInputStream(inputStream, true)));
-    }
-
-    private static final class ETags {
-        private final Map<File, Long> tags;
-
-        private ETags() {
-            tags = new HashMap<>();
-        }
-
-        void check(File file) {
-            if (!tags.containsKey(file) || tags.get(file) != file.lastModified())
-                setTag(file);
-        }
-
-        String get(File file) {
-            return Long.toHexString(tags.get(file));
-        }
-
-        void setTag(File file) {
-            tags.put(file, file.lastModified());
-        }
     }
 
     private static final class Request {

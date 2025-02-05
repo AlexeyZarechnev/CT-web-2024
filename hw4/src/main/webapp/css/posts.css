@@ -1,0 +1,63 @@
+main {
+    --additional-info-color: rgb(150, 150, 150);
+}
+
+main article {
+    margin: 1rem;
+}
+
+main article div.title {
+    color: var(--caption-color);
+    font-weight: bold;
+    font-size: 1.4rem;
+}
+
+main article div.information {
+    color: var(--additional-info-color);
+}
+
+main article div.body {
+    border-left: 5px solid var(--border-color);
+    padding-left: 15px;
+}
+
+main article ul.attachment {
+    list-style-type: none;
+    padding: 0;
+}
+
+main article ul.attachment li {
+    background: url(../img/paperclip-16x16.png) no-repeat left;
+    padding-left: 20px;
+    color: var(--additional-info-color);
+    font-size: 14px;
+    margin-bottom: 0.3rem;
+}
+
+main article div.footer {
+    border: var(--border-color) solid 1px;
+    border-radius: var(--border-radius);
+    height: 2rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+main article div div.left, main article div div.right {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0.5rem;
+    padding: 0.2rem;
+}
+
+main article div div > * {
+    margin: 0.2rem;
+}
+
+main article div div span.positive-score {
+    color: green;
+    font-weight: bold;
+}
